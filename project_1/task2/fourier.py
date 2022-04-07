@@ -10,7 +10,6 @@ def fftshift(img):
     This function should shift the spectrum image to the center.
     You should not use any kind of built in shift function. Please implement your own.
     '''
-
     row, col = img.shape
     res = img.copy()
 
@@ -27,7 +26,6 @@ def ifftshift(img):
     This function should do the reverse of what fftshift function does.
     You should not use any kind of built in shift function. Please implement your own.
     '''
-
     row, col = img.shape
     res = img.copy()
 
@@ -45,7 +43,6 @@ def fm_spectrum(img):
     Make sure that the spectrum image is shifted to the center using the implemented fftshift function.
     You may have to multiply the resultant spectrum by a certain magnitude in order to display it correctly.
     '''
-
     res = np.log1p(np.abs(fftshift(np.fft.fft2(img))))
 
     return res
@@ -55,7 +52,6 @@ def low_pass_filter(img, r=30):
     '''
     This function should return an image that goes through low-pass filter.
     '''
-
     row, col = img.shape
     center_row, center_col = row//2, col//2
     fft = fftshift(np.fft.fft2(img))
@@ -65,7 +61,7 @@ def low_pass_filter(img, r=30):
             if(distance(i, j, center_row, center_col) > r):
                 fft[i][j] = 0
 
-    return np.abs(np.fft.ifft2(ifftshift(fft)))
+    return np.real(np.fft.ifft2(ifftshift(fft)))
 
 
 def high_pass_filter(img, r=20):
@@ -82,7 +78,7 @@ def high_pass_filter(img, r=20):
             if(distance(i, j, center_row, center_col) < r):
                 fft[i][j] = 0
 
-    return np.abs(np.fft.ifft2(ifftshift(fft)))
+    return np.real(np.fft.ifft2(ifftshift(fft)))
 
 
 def denoise1(img):
@@ -92,7 +88,7 @@ def denoise1(img):
     '''
     row, col = img.shape
     center_row, center_col = row//2, col//2
-    fft = fftshift(np.fft.fft2(img))
+    fft = fftshift(fft2(img))
 
     point_width = 3
     point_center_1 = 53
@@ -116,7 +112,7 @@ def denoise1(img):
             for j in range(-point_width, point_width+1):
                 fft[point_rows[k]+i][point_cols[k]+j] = 0
 
-    return np.abs(np.fft.ifft2(ifftshift(fft)))
+    return np.real(np.fft.ifft2(ifftshift(fft)))
 
 
 def denoise2(img):
@@ -131,9 +127,9 @@ def denoise2(img):
     for i in range(row):
         for j in range(col):
             fft[i][j] = fft[i][j] * \
-                butterworth(i, j, center_row, center_col, 28, 2, 2)
+                butterworth(i, j, center_row, center_col, 28, 2, 10)
 
-    return np.abs(np.fft.ifft2(ifftshift(fft)))
+    return np.real(np.fft.ifft2(ifftshift(fft)))
 
 #################
 
