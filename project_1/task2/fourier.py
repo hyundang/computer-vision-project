@@ -142,7 +142,24 @@ def dft2(img):
     Implement 2D Discrete Fourier Transform.
     Naive implementation runs in O(N^4).
     '''
-    return img
+    row, col = img.shape
+    res = np.zeros([row, col], dtype='complex_')
+
+    for i in range(row):
+        res[i] = dft(img[i])
+    res = res.swapaxes(0,1)
+    for i in range(col):
+        res[i] = dft(res[i])
+    res = res.swapaxes(0,1)
+
+    return res
+
+def dft(img):
+    N = len(img)
+    n = np.arange(N)
+    k = n.reshape((N,1))
+    W = np.exp(-2j*np.pi*k*n / N)
+    return np.dot(W, img)
 
 
 def idft2(img):
@@ -151,7 +168,29 @@ def idft2(img):
     Implement 2D Inverse Discrete Fourier Transform.
     Naive implementation runs in O(N^4). 
     '''
-    return img
+    row, col = img.shape
+    res = np.zeros([row, col], dtype='complex_')
+
+    for i in range(col):
+        res[i] = idft(img[i])
+    res = res.swapaxes(0,1)
+    for i in range(row):
+        res[i] = idft(res[i])
+    res = res.swapaxes(0,1)
+    
+    res_1 = np.flip(res[:,1:col], axis=1)
+    res_1 = np.insert(res_1, 0, res[:, 0], axis=1)
+    res_2 = np.flip(res_1[1:row], axis=0)
+    res_2 = np.insert(res_2, 0, res_1[0], axis=0)
+
+    return res_2
+
+def idft(img):
+    N = len(img)
+    n = np.arange(N)
+    k = n.reshape((N,1))
+    W = np.exp(2j*np.pi*k*n / N)
+    return np.dot(W, img)
 
 
 def fft2(img):
@@ -171,7 +210,6 @@ def fft2(img):
     res = res.swapaxes(0,1)
     
     return res
-
 
 def fft(img):
     N = len(img)
@@ -205,7 +243,6 @@ def ifft2(img):
     res = res / (row*col)
 
     return res
-
 
 def ifft(img):
     N = len(img)
