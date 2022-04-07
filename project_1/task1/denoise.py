@@ -21,32 +21,49 @@ def task1_2(src_path, clean_path, dst_path):
     # do noise removal
     sigma_s = 200
     sigma_r = 70
-    result_img = apply_median_filter(noisy_img, kernel_size=3)
+    # result_img = apply_median_filter(noisy_img, kernel_size=3)
     # result_img = apply_bilateral_filter(
     #     noisy_img, 5, sigma_s, sigma_r)
     # result_img = apply_my_filter(noisy_img)
 
-    print("rms: ", calculate_rms(clean_img, result_img))
-    cv2.imwrite(dst_path, result_img)
+    # print("rms: ", calculate_rms(clean_img, result_img))
+    # cv2.imwrite(dst_path, result_img)
 
     # find optimal solution
-    # result_img_med = apply_median_filter(noisy_img, kernel_size=3)
-    # rms_med = calculate_rms(clean_img, result_img_med)
-    # result_img_bi = apply_bilateral_filter(noisy_img, 5, 200, 70)
-    # rms_bi = calculate_rms(clean_img, result_img_bi)
-    # result_img_my = apply_my_filter(noisy_img)
-    # rms_my = calculate_rms(clean_img, result_img_my)
+    kernel_size = 3
+    result_img_med = apply_median_filter(noisy_img, kernel_size)
+    rms_med = calculate_rms(clean_img, result_img_med)
+    result_img_bi = apply_bilateral_filter(noisy_img, kernel_size, 200, 70)
+    rms_bi = calculate_rms(clean_img, result_img_bi)
+    result_img_my = apply_my_filter(noisy_img)
+    rms_my = calculate_rms(clean_img, result_img_my)
 
-    # min_rms = min(rms_med, rms_bi, rms_my)
-    # if(min_rms == rms_med):
-    #     print("rms: ", rms_med)
-    #     cv2.imwrite(dst_path, result_img_med)
-    # elif(min_rms == rms_bi):
-    #     print("rms: ", rms_bi)
-    #     cv2.imwrite(dst_path, result_img_bi)
-    # else:
-    #     print("rms: ", rms_my)
-    #     cv2.imwrite(dst_path, result_img_my)
+    min_rms = min(rms_med, rms_bi, rms_my)
+    if(min_rms == rms_med):
+        while(1):
+            res = apply_median_filter(noisy_img, kernel_size+2)
+            rms = calculate_rms(clean_img, res)
+            if(rms > rms_med):
+                break
+            rms_med = rms
+            result_img_med = res
+            kernel_size += 2
+        print("rms: ", rms_med, " / type: median / kernel size: ", kernel_size)
+        cv2.imwrite(dst_path, result_img_med)
+    elif(min_rms == rms_bi):
+        while(1):
+            res = apply_bilateral_filter(noisy_img, kernel_size+2, 200, 70)
+            rms = calculate_rms(clean_img, res)
+            if(rms > rms_bi):
+                break
+            rms_bi = rms
+            result_img_bi = res
+            kernel_size += 2
+        print("rms: ", rms_bi, " / type: bilateral / kernel size: ", kernel_size)
+        cv2.imwrite(dst_path, result_img_bi)
+    else:
+        print("rms: ", rms_my, " / type: my / kernel size: ", 5)
+        cv2.imwrite(dst_path, result_img_my)
     pass
 
 
@@ -70,13 +87,14 @@ def apply_median_filter(img, kernel_size):
     for i in tqdm(range(row)):
         for j in range(col):
             for k in range(channel):
-                res[i][j][k] = np.median(input[i:i+kernel_size, j:j+kernel_size, k])
-                
+                res[i][j][k] = np.median(
+                    input[i:i+kernel_size, j:j+kernel_size, k])
+
                 # if(j+kernel_size>=col+kernel_size-1):
                 #     avg = np.mean(input[i:i+kernel_size, j:-1, k])
                 # else:
                 #     avg = np.mean(input[i:i+kernel_size, j:j+kernel_size+1, k])
-                
+
                 # is_value_bigger = True
                 # for x in range(kernel_size):
                 #     for y in range(kernel_size+1):
@@ -88,8 +106,8 @@ def apply_median_filter(img, kernel_size):
                 #             break
                 # if(is_value_bigger):
                 #     input[i+pad_num][j+pad_num][k] = np.median(input[i:i+kernel_size, j:j+kernel_size, k])
-                #     res[i][j][k] = input[i+pad_num][j+pad_num][k] 
-    
+                #     res[i][j][k] = input[i+pad_num][j+pad_num][k]
+
     return res
 
 
