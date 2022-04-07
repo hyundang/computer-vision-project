@@ -26,15 +26,6 @@ def task1_2(src_path, clean_path, dst_path):
     #     noisy_img, 5, sigma_s, sigma_r)
     # result_img = apply_my_filter(noisy_img)
 
-    # 각 이미지에 대한 최적 sigma값
-    # if(src_path.find("cat")>=0):
-    #     result_img = apply_median_filter(noisy_img, kernel_size=3)
-    # elif(src_path.find("fox")>=0):
-    #     result_img = apply_bilateral_filter(
-    #     noisy_img, 5, 200, 50)
-    # else:
-    #     result_img = apply_bilateral_filter(
-    #     noisy_img, 7, 200, 80)
     print("rms: ", calculate_rms(clean_img, result_img))
     cv2.imwrite(dst_path, result_img)
 
@@ -79,18 +70,26 @@ def apply_median_filter(img, kernel_size):
     for i in tqdm(range(row)):
         for j in range(col):
             for k in range(channel):
-                # res[i][j][k] = np.median(input[i:i+kernel_size, j:j+kernel_size, k])
+                res[i][j][k] = np.median(input[i:i+kernel_size, j:j+kernel_size, k])
                 
-                avg = np.average(input[i:i+kernel_size, j:j+kernel_size, k])
-                is_value_bigger = True
-                for x in range(kernel_size):
-                    for y in range(kernel_size):
-                        if(x!=pad_num and y!=pad_num and input[i+x][j+y][k]<avg):
-                            is_value_bigger = False
-                            break
-                if(is_value_bigger):
-                    res[i][j][k] = np.median(input[i:i+kernel_size, j:j+kernel_size, k])
-
+                # if(j+kernel_size>=col+kernel_size-1):
+                #     avg = np.mean(input[i:i+kernel_size, j:-1, k])
+                # else:
+                #     avg = np.mean(input[i:i+kernel_size, j:j+kernel_size+1, k])
+                
+                # is_value_bigger = True
+                # for x in range(kernel_size):
+                #     for y in range(kernel_size+1):
+                #         coord_col = j+y
+                #         if(coord_col>=col+kernel_size-1):
+                #             coord_col = -1
+                #         if(x!=pad_num and y!=pad_num and input[i+x][coord_col][k]<avg):
+                #             is_value_bigger = False
+                #             break
+                # if(is_value_bigger):
+                #     input[i+pad_num][j+pad_num][k] = np.median(input[i:i+kernel_size, j:j+kernel_size, k])
+                #     res[i][j][k] = input[i+pad_num][j+pad_num][k] 
+    
     return res
 
 
