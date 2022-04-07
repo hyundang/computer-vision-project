@@ -88,7 +88,7 @@ def denoise1(img):
     '''
     row, col = img.shape
     center_row, center_col = row//2, col//2
-    fft = fftshift(fft2(img))
+    fft = fftshift(np.fft.fft2(img))
 
     point_width = 3
     point_center_1 = 53
@@ -160,7 +160,31 @@ def fft2(img):
     Implement 2D Fast Fourier Transform.
     Correct implementation runs in O(N^2*log(N)).
     '''
-    return img
+    row, col = img.shape
+    res = np.zeros([row, col], dtype='complex_')
+
+    for i in range(row):
+        res[i] = fft(img[i])
+    res = res.swapaxes(0,1)
+    for i in range(col):
+        res[i] = fft(res[i])
+    res = res.swapaxes(0,1)
+    
+    return res
+
+
+def fft(img):
+    N = len(img)
+    if(N == 1):
+        return img
+    else:
+        res_even = fft(img[0::2])
+        res_odd = fft(img[1::2])
+        W = np.exp(-2j*np.pi*np.arange(N) / N)
+        res = np.concatenate(
+            (res_even + W[:int(N/2)]*res_odd, 
+            res_even + W[int(N/2):]*res_odd))
+        return res
 
 
 def ifft2(img):
@@ -169,7 +193,33 @@ def ifft2(img):
     Implement 2D Inverse Fast Fourier Transform.
     Correct implementation runs in O(N^2*log(N)).
     '''
-    return img
+    row, col = img.shape
+    res = np.zeros([row, col], dtype='complex_')
+
+    for i in range(col):
+        res[i] = ifft(img[i])
+    res = res.swapaxes(0,1)
+    for i in range(row):
+        res[i] = ifft(res[i])
+    res = res.swapaxes(0,1)
+    res = res / (row*col)
+
+    return res
+
+
+def ifft(img):
+    N = len(img)
+    if(N == 1):
+        return img
+    else:
+        res_even = ifft(img[0::2])
+        res_odd = ifft(img[1::2])
+        W = np.exp(2j*np.pi*np.arange(N) / N)
+        res = np.concatenate(
+            (res_even + W[:int(N/2)]*res_odd, 
+            res_even + W[int(N/2):]*res_odd))
+        res = res
+        return res
 
 
 def distance(x1, y1, x2, y2):
