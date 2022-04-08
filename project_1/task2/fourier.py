@@ -215,10 +215,10 @@ def ifft2(img):
     row, col = img.shape
     res = np.zeros([row, col], dtype='complex_')
 
-    for i in range(col):
+    for i in range(row):
         res[i] = calculate_fft(img[i], True)
     res = res.swapaxes(0, 1)
-    for i in range(row):
+    for i in range(col):
         res[i] = calculate_fft(res[i], True)
     res = res.swapaxes(0, 1)
     res = res / (row*col)

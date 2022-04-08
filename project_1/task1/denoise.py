@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from sympy import false
-from tqdm import tqdm
 
 
 def task1_2(src_path, clean_path, dst_path):
@@ -17,17 +16,6 @@ def task1_2(src_path, clean_path, dst_path):
     """
     noisy_img = cv2.imread(src_path)
     clean_img = cv2.imread(clean_path)
-
-    # do noise removal
-    sigma_s = 200
-    sigma_r = 70
-    # result_img = apply_median_filter(noisy_img, kernel_size=3)
-    # result_img = apply_bilateral_filter(
-    #     noisy_img, 5, sigma_s, sigma_r)
-    # result_img = apply_my_filter(noisy_img)
-
-    # print("rms: ", calculate_rms(clean_img, result_img))
-    # cv2.imwrite(dst_path, result_img)
 
     # find optimal solution
     kernel_size = 3
@@ -85,7 +73,7 @@ def apply_median_filter(img, kernel_size):
 
     input = img_padding(input, row, pad_num)
 
-    for i in tqdm(range(row)):
+    for i in range(row):
         for j in range(col):
             for k in range(channel):
                 sorted_input = np.sort(input[i:i+kernel_size, j:j+kernel_size, k].flatten())
@@ -113,7 +101,7 @@ def apply_bilateral_filter(img, kernel_size, sigma_s, sigma_r):
 
     input = img_padding(input, row, pad_num)
 
-    for i in tqdm(range(row)):
+    for i in range(row):
         for j in range(col):
             for k in range(channel):
                 calulate_Ip(input, res, kernel_size, i, j, k, sigma_s, sigma_r)
@@ -137,8 +125,7 @@ def apply_my_filter(img):
 
     input = img_padding(input, row, pad_num)
 
-    # Nagao-Matsuyama filter
-    for i in tqdm(range(row)):
+    for i in range(row):
         for j in range(col):
             for k in range(channel):
                 calculate_NM(input, res, i, j, k)
@@ -268,7 +255,7 @@ def calculate_NM(input, img, coord_row, coord_col, channel):
 if __name__ == '__main__':
     task1_2('test_images/cat_noisy.jpg',
             'test_images/cat_clean.jpg', 'res/cat_clean.jpg')
-    # task1_2('test_images/fox_noisy.jpg',
-    #         'test_images/fox_clean.jpg', 'res/fox_clean.jpg')
-    # task1_2('test_images/Snowman_noisy.jpg',
-    #         'test_images/Snowman_clean.jpg', 'res/Snowman_clean.jpg')
+    task1_2('test_images/fox_noisy.jpg',
+            'test_images/fox_clean.jpg', 'res/fox_clean.jpg')
+    task1_2('test_images/Snowman_noisy.jpg',
+            'test_images/Snowman_clean.jpg', 'res/Snowman_clean.jpg')
