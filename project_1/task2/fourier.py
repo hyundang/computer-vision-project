@@ -144,22 +144,21 @@ def dft2(img):
     '''
     row, col = img.shape
     res = np.zeros([row, col], dtype='complex_')
+    W_m = np.zeros([row, row], dtype='complex_')
+    W_n = np.zeros([col, col], dtype='complex_')
 
-    for i in range(row):
-        res[i] = dft(img[i])
-    res = res.swapaxes(0,1)
-    for i in range(col):
-        res[i] = dft(res[i])
-    res = res.swapaxes(0,1)
+    for u in range(row):
+        for x in range(row):
+            W_m[u, x] = np.exp(-2j*np.pi*u*x / row)
+
+    for v in range(col):
+        for y in range(col):
+            W_n[v, y] = np.exp(-2j*np.pi*v*y / col)
+
+    res = np.dot(img, W_n)
+    res = np.dot(W_m, res)
 
     return res
-
-def dft(img):
-    N = len(img)
-    n = np.arange(N)
-    k = n.reshape((N,1))
-    W = np.exp(-2j*np.pi*k*n / N)
-    return np.dot(W, img)
 
 
 def idft2(img):
@@ -170,27 +169,22 @@ def idft2(img):
     '''
     row, col = img.shape
     res = np.zeros([row, col], dtype='complex_')
+    W_x = np.zeros([row, row], dtype='complex_')
+    W_y = np.zeros([col, col], dtype='complex_')
+
+    for i in range(row):
+        for j in range(row):
+            W_x[i, j] = np.exp(2j*np.pi*i*j / row)
 
     for i in range(col):
-        res[i] = idft(img[i])
-    res = res.swapaxes(0,1)
-    for i in range(row):
-        res[i] = idft(res[i])
-    res = res.swapaxes(0,1)
-    
-    res_1 = np.flip(res[:,1:col], axis=1)
-    res_1 = np.insert(res_1, 0, res[:, 0], axis=1)
-    res_2 = np.flip(res_1[1:row], axis=0)
-    res_2 = np.insert(res_2, 0, res_1[0], axis=0)
+        for j in range(col):
+            W_y[i, j] = np.exp(2j*np.pi*i*j / col)
 
-    return res_2
+    res = np.dot(img, W_y)
+    res = np.dot(W_x, res)
+    res = res/(row*col)
 
-def idft(img):
-    N = len(img)
-    n = np.arange(N)
-    k = n.reshape((N,1))
-    W = np.exp(2j*np.pi*k*n / N)
-    return np.dot(W, img)
+    return res
 
 
 def fft2(img):
@@ -203,26 +197,13 @@ def fft2(img):
     res = np.zeros([row, col], dtype='complex_')
 
     for i in range(row):
-        res[i] = fft(img[i])
-    res = res.swapaxes(0,1)
+        res[i] = calculate_fft(img[i], False)
+    res = res.swapaxes(0, 1)
     for i in range(col):
-        res[i] = fft(res[i])
-    res = res.swapaxes(0,1)
-    
-    return res
+        res[i] = calculate_fft(res[i], False)
+    res = res.swapaxes(0, 1)
 
-def fft(img):
-    N = len(img)
-    if(N == 1):
-        return img
-    else:
-        res_even = fft(img[0::2])
-        res_odd = fft(img[1::2])
-        W = np.exp(-2j*np.pi*np.arange(N) / N)
-        res = np.concatenate(
-            (res_even + W[:int(N/2)]*res_odd, 
-            res_even + W[int(N/2):]*res_odd))
-        return res
+    return res
 
 
 def ifft2(img):
@@ -235,27 +216,38 @@ def ifft2(img):
     res = np.zeros([row, col], dtype='complex_')
 
     for i in range(col):
-        res[i] = ifft(img[i])
-    res = res.swapaxes(0,1)
+        res[i] = calculate_fft(img[i], True)
+    res = res.swapaxes(0, 1)
     for i in range(row):
-        res[i] = ifft(res[i])
-    res = res.swapaxes(0,1)
+        res[i] = calculate_fft(res[i], True)
+    res = res.swapaxes(0, 1)
     res = res / (row*col)
 
     return res
 
-def ifft(img):
+
+def calculate_fft(img, is_inverse):
     N = len(img)
     if(N == 1):
         return img
     else:
-        res_even = ifft(img[0::2])
-        res_odd = ifft(img[1::2])
-        W = np.exp(2j*np.pi*np.arange(N) / N)
-        res = np.concatenate(
-            (res_even + W[:int(N/2)]*res_odd, 
-            res_even + W[int(N/2):]*res_odd))
-        res = res
+        res_even = calculate_fft(img[0::2], is_inverse)
+        res_odd = calculate_fft(img[1::2], is_inverse)
+        
+        kn = []
+        for i in range(N):
+            kn.append(i)
+        kn = np.array(kn)
+        
+        if(is_inverse):
+            W = np.exp(2j*np.pi*kn / N)
+        else:
+            W = np.exp(-2j*np.pi*kn / N)
+        
+        res = np.hstack(
+            (res_even + W[:int(N/2)]*res_odd,
+             res_even + W[int(N/2):]*res_odd))
+        
         return res
 
 
