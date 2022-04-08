@@ -81,32 +81,15 @@ def apply_median_filter(img, kernel_size):
     input = img.copy()
     res = img.copy()
     pad_num = kernel_size//2
+    idx =  kernel_size**2//2
 
     input = img_padding(input, row, pad_num)
 
     for i in tqdm(range(row)):
         for j in range(col):
             for k in range(channel):
-                res[i][j][k] = np.median(
-                    input[i:i+kernel_size, j:j+kernel_size, k])
-
-                # if(j+kernel_size>=col+kernel_size-1):
-                #     avg = np.mean(input[i:i+kernel_size, j:-1, k])
-                # else:
-                #     avg = np.mean(input[i:i+kernel_size, j:j+kernel_size+1, k])
-
-                # is_value_bigger = True
-                # for x in range(kernel_size):
-                #     for y in range(kernel_size+1):
-                #         coord_col = j+y
-                #         if(coord_col>=col+kernel_size-1):
-                #             coord_col = -1
-                #         if(x!=pad_num and y!=pad_num and input[i+x][coord_col][k]<avg):
-                #             is_value_bigger = False
-                #             break
-                # if(is_value_bigger):
-                #     input[i+pad_num][j+pad_num][k] = np.median(input[i:i+kernel_size, j:j+kernel_size, k])
-                #     res[i][j][k] = input[i+pad_num][j+pad_num][k]
+                sorted_input = np.sort(input[i:i+kernel_size, j:j+kernel_size, k].flatten())
+                res[i][j][k] = sorted_input[idx]
 
     return res
 
